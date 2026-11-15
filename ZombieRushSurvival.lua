@@ -331,18 +331,18 @@ function autoAim(label)
 				return a[2] < b[2]
 			end)
 			for i, v in distances do
-				--local raycastParams = RaycastParams.new()
-				--raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-				--raycastParams.FilterDescendantsInstances = {workspace["Zombie_ClientVisuals"]}
-				--local Raycast = workspace:Raycast(v[1].Position, (Head.Position-v[1].Position), raycastParams)
-				--if Raycast and Raycast.Instance == v[1] then
+				local raycastParams = RaycastParams.new()
+				raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+				raycastParams.FilterDescendantsInstances = {workspace["Zombie_ClientVisuals"]}
+				local Raycast = workspace:Raycast(v[1].Position, (Head.Position-v[1].Position), raycastParams)
+				if Raycast and Raycast.Instance:IsDescendantOf(Head.Parent) then
 					--local TimeNeed = label.Parent.At.Text == "Target Type: Nearest to the crossair" and v[2]/(AimSpeed*1000) or ((Vector2.new(game.Players.LocalPlayer:GetMouse().X, game.Players.LocalPlayer:GetMouse().Y) - Vector2.new(vector.X, vector.Y)).Magnitude)/(AimSpeed*1000)
 					--local tween = game:GetService("TweenService"):Create(workspace.CurrentCamera, TweenInfo.new(TimeNeed, Enum.EasingStyle.Sine), {CFrame = CFrame.lookAt(workspace.CurrentCamera.CFrame.Position, v[1].Position)})
 					--tween:Play()
 					--tween.Completed:Wait()
 					workspace.CurrentCamera.CFrame = CFrame.lookAt(workspace.CurrentCamera.CFrame.Position, v[1].Position)
 					break
-				--end
+				end
 			end
 		end
 	end
