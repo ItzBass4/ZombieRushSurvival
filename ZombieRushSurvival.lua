@@ -48,7 +48,7 @@ function loadUi()
 	TextBool.Position = UDim2.new(0.05,0,0,0)
 	TextBool.Size = UDim2.new(0.9,0,0.08,0)
 	TextBool.Font = Enum.Font.SourceSansBold
-	TextBool.Text = "Auto Farm"
+	TextBool.Text = "Teleport Auto Farm"
 	TextBool.TextScaled = true
 	TextBool.TextXAlignment = Enum.TextXAlignment.Left
 	table.insert(Booleans, TextBool)
@@ -82,10 +82,18 @@ function loadUi()
 	v5.TextColor3 = Color3.new(1,1,1)
 	v5.TextSize = 50
 	Instance.new("UICorner", v5).CornerRadius = UDim.new(0,16)
+	local v51 = TextBool:Clone()
+	v51.Name = "Bo2"
+	v51.Parent = v2.Af
+	v51.Position = UDim2.new(0.05,0,0.16,0)
+	v51.Text = "Jump Bot Auto Farm"
+	v51.TextScaled = false
+	v51.TextSize = 80
+	table.insert(Booleans, v51)
 	local v6 = TextBool:Clone()
 	v6.Name = "txt"
 	v6.Parent = v2.Af
-	v6.Position = UDim2.new(0.05,0,0.16,0)
+	v6.Position = UDim2.new(0.05,0,0.29,0)
 	v6.Text = "USE AUTOCLICKER!"
 	v6.TextScaled = false
 	v6.TextSize = 70
@@ -274,7 +282,7 @@ function func(LowHp, v, offset, label)
 	end
 	task.wait()
 	if v and v:FindFirstChild("HumanoidRootPart") and workspace["Zombie_ClientVisuals"]:FindFirstChild(v.Name) and label.TextButton.Frame.Visible then
-		if game.Players.LocalPlayer.Character:GetAttribute("Health") >= game.Players.LocalPlayer.Character:GetAttribute("MaxHealth")/1.25 then
+		if game.Players.LocalPlayer.Character:GetAttribute("Health") >= game.Players.LocalPlayer.Character:GetAttribute("MaxHealth")/1.5 then
 			func(false, v, offset, label)
 		else
 			func(true, v, offset, label)
@@ -282,6 +290,8 @@ function func(LowHp, v, offset, label)
 	end
 end
 function autoFarm(label)
+	label.Parent.Bo2.TextButton.Frame.Visible = false
+	task.wait()
 	while label.TextButton.Frame.Visible do
 		UI.Frame.Folder.Aim.Ab.TextButton.Frame.Visible = false
 		UI.Frame.Folder.Plr.Am.TextButton.Frame.Visible = false
@@ -292,7 +302,7 @@ function autoFarm(label)
 				UI.Frame.Folder.Plr.Am.TextButton.Frame.Visible = false
 				if label.TextButton.Frame.Visible then
 					local offset = tonumber(label.Parent.Of.TextBox.Text)~=nil and tonumber(label.Parent.Of.TextBox.Text) or 30
-					if game.Players.LocalPlayer.Character:GetAttribute("Health") >= game.Players.LocalPlayer.Character:GetAttribute("MaxHealth")/1.25 then
+					if game.Players.LocalPlayer.Character:GetAttribute("Health") >= game.Players.LocalPlayer.Character:GetAttribute("MaxHealth")/1.5 then
 						func(false, v, offset, label)
 					else
 						func(true, v, offset, label)
@@ -306,6 +316,88 @@ function autoFarm(label)
 	end
 	local Root = game.Players.LocalPlayer.Character.HumanoidRootPart
 	Root.Position = Vector3.new(0, 200, -1800)
+end
+
+local prevZombie = nil
+local posIndex = 0
+local walkTime = 0
+local maxWalkTime = 0
+local tpIndex = 0
+function walkAutoFarm(label)
+	label.Parent.Bo.TextButton.Frame.Visible = false
+	task.wait()
+	while label.TextButton.Frame.Visible do
+		UI.Frame.Folder.Aim.Ab.TextButton.Frame.Visible = false
+		UI.Frame.Folder.Plr.Am.TextButton.Frame.Visible = false
+		UI.Frame.Folder.Plr.Bh.TextButton.Frame.Visible = false
+		task.wait()
+		if workspace["Zombie_ClientVisuals"]:GetChildren()[1] then
+			if game.Players.LocalPlayer.Character:GetAttribute("Health") <= game.Players.LocalPlayer.Character:GetAttribute("MaxHealth")/1.5 then
+				local Root = game.Players.LocalPlayer.Character.HumanoidRootPart
+				Root.Position = Vector3.new(0, 250, -1750)
+				prevZombie = nil
+			else
+				for i2, v2 in game.Players.LocalPlayer.Backpack:GetDescendants() do
+					if v2.Name == "ClipSize" or v2.Name == "Clip" then
+						v2.Value = 10000
+					end
+				end
+				for i2, v2 in game.Players.LocalPlayer.Character:GetDescendants() do
+					if v2.Name == "ClipSize" or v2.Name == "Clip" then
+						v2.Value = 10000
+					end
+				end
+				if prevZombie == nil then
+					local Root = game.Players.LocalPlayer.Character.HumanoidRootPart
+					if tpIndex == 0 then Root.Position = Vector3.new(0, 200, -1800)
+					elseif tpIndex >= 1 then Root.Position = Vector3.new(0, 200, -1900) tpIndex = -1
+					end
+					tpIndex += 1
+				end
+				local distances = {}
+				local Head = game.Players.LocalPlayer.Character.Head
+				for i, v in workspace["Zombie_ClientVisuals"]:GetChildren() do
+					local zHead = v.Head
+					table.insert(distances, {zHead, (Head.Position - zHead.Position).Magnitude})
+				end
+				table.sort(distances, function(a, b)
+					return a[2] < b[2]
+				end)
+				local zHead = distances[1][1]
+				local hum = game.Players.LocalPlayer.Character.Humanoid
+				if hum.FloorMaterial ~= Enum.Material.Air then
+					hum:ChangeState(Enum.HumanoidStateType.Jumping, true)
+					hum.Jump = true
+				end
+				hum.WalkSpeed = 100
+				local Root = game.Players.LocalPlayer.Character.HumanoidRootPart
+				if prevZombie ~= zHead then walkTime = 0 maxWalkTime = 0 end
+				local function func2(Vector)
+					hum:MoveTo(Vector)
+					local distance = (Head.Position - Vector).Magnitude
+					maxWalkTime = walkTime <= 0 and distance/100 or maxWalkTime
+					walkTime += task.wait()
+					if walkTime >= maxWalkTime then
+						walkTime = 0
+						maxWalkTime = 0
+						posIndex += 1
+						if posIndex > 3 then posIndex = 0 end
+					end
+				end
+				if posIndex == 0 then func2(zHead.Position + Vector3.new(30,0,30))
+				elseif posIndex == 1 then func2(zHead.Position + Vector3.new(-30,0,30))
+				elseif posIndex == 2 then func2(zHead.Position + Vector3.new(-30,0,-30))
+				elseif posIndex >= 3 then func2(zHead.Position + Vector3.new(30,0,-30))
+				end
+				workspace.CurrentCamera.CFrame = CFrame.lookAt(Head.Position, zHead.Position)
+				prevZombie = zHead
+			end
+		end
+	end
+	local Root = game.Players.LocalPlayer.Character.HumanoidRootPart
+	Root.Position = Vector3.new(0, 200, -1800)
+	local hum = game.Players.LocalPlayer.Character.Humanoid
+	hum.WalkSpeed = tonumber(UI.Frame.Folder.Plr.Ws.TextBox.Text)~=nil and tonumber(UI.Frame.Folder.Plr.Ws.TextBox.Text) or 16
 end
 
 function autoAim(label)
@@ -432,6 +524,7 @@ for i, v in Booleans do
 		v.TextButton.Frame.Visible = not v.TextButton.Frame.Visible
 		if v.TextButton.Frame.Visible then
 			if v.Name == "Bo" then autoFarm(v) 
+			elseif v.Name == "Bo2" then walkAutoFarm(v)
 			elseif v.Name == "Ab" then autoAim(v)
 			elseif v.Name == "Am" then infAmmo(v)
 			elseif v.Name == "Bh" then bunnyHop(v)
@@ -488,6 +581,14 @@ local clicks = 0
 UI.Frame.Folder.St.TextButton.MouseButton1Click:Connect(function()
 	clicks += 1
 	if clicks > 1 then
+		local Root = game.Players.LocalPlayer.Character.HumanoidRootPart
+		Root.Position = Vector3.new(0, 200, -1800)
+		for i, v in Booleans do
+			v.TextButton.Frame.Visible = false
+			task.wait()
+		end
+		task.wait()
+		task.wait()
 		for i, v in UI:GetDescendants() do
 			task.wait()
 			v:Destroy()
