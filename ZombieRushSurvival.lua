@@ -3,7 +3,7 @@ if game:GetService("UserInputService").KeyboardEnabled == false then
 	local ui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 	local Text = Instance.new("TextLabel", ui)
 	Text.BackgroundTransparency = 1
-	Text.Text = "Keyboard not detected"
+	Text.Text = "No keyboard found"
 	Text.Size = UDim2.new(0.5,0,0.5,0)
 	Text.Position = UDim2.new(0.25,0,0.25,0)
 	Text.TextScaled = true
